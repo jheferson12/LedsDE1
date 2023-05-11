@@ -41,7 +41,7 @@ public class ListDEController {
     }
 
 
-    @PostMapping(path = "/addpet")
+    @PostMapping(path = "/addled")
     public ResponseEntity<ResponseDTO> addLed(@RequestBody LedDTO ledDTO) throws Exception {
 
         try {
