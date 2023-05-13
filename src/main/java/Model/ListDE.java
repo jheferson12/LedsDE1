@@ -8,7 +8,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 @Data
 @Getter
 @Setter
@@ -16,45 +19,32 @@ public class ListDE {
     private NodeDE head;
     private NodeDE tail;
     private int size;
-    private List<Led> ledList = new ArrayList<>();
+    private List<Led> ledList = new LinkedList<>();
 
-    public void validAdd (Led led) throws Exception{
-
-        if (head == null) {
-
-        } else {
-
+    //-------VALIDAR PARA AÑADIR-------------------------------------------
+    public void validAdd(Led led) throws Exception {
+        if (head != null) {
             NodeDE current = head;
-
-            //reviso si ya existe una bombillo con la id de la bombillo siendo agregada
-            if (current.getData().getIdentification().equals(led.getIdentification()) ){
-                throw new Exception("Ya existe una bombillo con la identificación" + led.getIdentification());
-            }
-
-
-            //recorro la lista hasta que llegue al final
-            while (current.getNext() != null) {
-
-                //reviso si ya existe una bombillo con la id de la bombillo siendo agregada
-                if (current.getData().getIdentification().equals(led.getIdentification()) ){
+            while (current != null) {
+                if (current.getData().getIdentification().equals(led.getIdentification())) {
                     throw new Exception("Ya existe una bombillo con la identificación" + led.getIdentification());
                 }
-
                 current = current.getNext();
-
             }
         }
     }
 
-    public List<Led> print() throws Exception{
+
+    //-----------------IMPRIMIR BOMBILLO-------------
+    public List<Led> print() throws Exception {
 
         //vacío la lista normal que ya tengo
         ledList.clear();
 
         //recorro la lista agregando las bombillas de cada nodo a la lista normal
-        if (head != null){
+        if (head != null) {
             NodeDE temp = head;
-            while (temp != null){
+            while (temp != null) {
                 ledList.add(temp.getData());
                 temp = temp.getNext();
             }
@@ -65,20 +55,6 @@ public class ListDE {
         //retorno dicha lista normal
         return ledList;
     }
-
-    public void invert() {
-        NodeDE current = head;
-        NodeDE prev = null;
-        NodeDE next = null;
-        while (current != null) {
-            next = current.getNext();
-            current.setNext(prev);
-            prev = current;
-            current = next;
-        }
-        head = prev;
-    }
-
 
 
     public void reset() throws Exception {
@@ -98,16 +74,35 @@ public class ListDE {
     }
 
 
-    public void addToStart(Led bulb) throws Exception {
+    //---------------------AÑADIR BOMBILLO LED--------------------
+    public void addLed(Led led) {
+        NodeDE nodeDE = new NodeDE(led);
+
+        if (head == null) {
+            head = nodeDE;
+        } else {
+            NodeDE current = head;
+            while (current.getNext() != null) {
+                current = current.getNext();
+            }
+            current.setNext(nodeDE);
+
+            nodeDE.setPrevious(current);
+        }
+
+        size++;
+    }
+    //------------AÑADIR BOMBILLO LED AL INICIO-------------
+    public void addToStart(Led led) throws Exception {
         // check if bulb already exists in the list
         for (Led l : ledList) {
-            if (l.getIdentification().equals(bulb.getIdentification())) {
+            if (l.getIdentification().equals(led.getIdentification())) {
                 throw new Exception("Ya existe una luz con este identificador.");
             }
         }
 
         // create a new node
-        NodeDE newNode = new NodeDE(bulb);
+        NodeDE newNode = new NodeDE(led);
 
         // if the list is not empty, update head and previous node
         if (head != null) {
@@ -120,92 +115,69 @@ public class ListDE {
         size++;
     }
 
-    public void add(Led bulb) throws Exception{
-
-        //si la cabeza es nula, la nueva cabeza es la bombilla ingresada
-        if (head == null) {
-            head = new NodeDE(bulb);
-
-        } else {
-
-            //sino, defino un nuevo nodo
-            NodeDE newNode = new NodeDE(bulb);
-            NodeDE current = head;
-
-            //reviso si ya existe una bombilla con la id de la bombilla siendo agregada
-            if (current.getData().getIdentification().equals(bulb.getIdentification()) ){
-                throw new Exception("Ya existe una bombilla con la identificación" + bulb.getIdentification());
+    //-----------------------BOMBILLO POR ID--------------------------
+    public Led getLedById(String identification) {
+        // Aquí debes implementar la lógica para buscar un Led por su ID
+        // por ejemplo, puedes usar un ciclo for para recorrer una lista de Leds y buscar el que tenga el ID indicado:
+        for (Led led : ledList) {
+            if (led.getIdentification() == identification) {
+                return led;
             }
-
-            //recorro la lista hasta que llegue al final
-            while (current.getNext() != null) {
-
-                //reviso si ya existe una bombilla con la id de la bombilla siendo agregada
-                if (current.getData().getIdentification().equals(bulb.getIdentification()) ){
-                    throw new Exception("Ya existe una bombilla con la identificación" + bulb.getIdentification());
-                }
-
-                current = current.getNext();
-
-            }
-
-            //en el final, meto la bombilla
-            newNode.setPrevious(current);
-            current.setNext(newNode);
-
         }
-
-        //aumento el tamaño de la lista
-        size++;
+        // Si no se encuentra el Led con el ID indicado, se devuelve null:
+        return null;
     }
 
-    public void deleteByPlace(int place) throws Exception{
-
-        //reviso que los lugares ingresados sean válidos
-        if (head == null) {
-            throw new Exception("la lista está vacía");
-        } else if (place < 1) {
-            throw new Exception("el ingresado es menor a 1");
-        } else if (place > size){
-            throw new Exception("el lugar ingresado es mayor al tamaño de la lista");
-        }
-
-        //defino un ayudante y un contador para saber cuantos pasos llevo
+    //---------------BOBILLOS LED HACIA ADELANTE-------------------------
+    public void getLedForwards(int place) throws Exception {
         NodeDE temp = head;
         int steps = 1;
-
-        //recorro la lista
-        while (temp != null){
-
-            //reviso si el puesto es igual al puesto buscado
-            if (steps == place){
-                NodeDE prev = temp.getPrevious();
-                NodeDE next = temp.getNext();
-
-                //reviso si es la cabeza
-                if (prev == null){
-                    //si sí, la cabeza será la siguiente, es decir, quito la mascota de la cabeza
-                    head = next;
-                }else{
-                    //sino, hago que el previo tenga como siguiente a el siguiente de temp, es decir, saco a temp de la lista
-                    prev.setNext(next);
+        while (temp != null) {
+            if (steps == place) {
+                temp.getData().setStateLed(true);
+                temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
+                if (temp.getNext() != null) {
+                    while (temp.getNext() != null) {
+                        Thread.sleep(1000);
+                        temp.getData().setStateLed(false);
+                        temp.getData().setLastoff(LocalTime.from(LocalDateTime.now()));
+                        temp = temp.getNext();
+                        temp.getData().setStateLed(true);
+                        temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
+                    }
                 }
-
-                //reviso si es el último
-                if (next != null){
-                    //si next no es nulo, es decir, si no estoy en el final de la fila, hago que next tenga de previo a prev
-                    next.setPrevious(prev);
-                }
-
-                //después de haberlo removido, resto del tamaño de la fila
-                size--;
             }
             steps++;
             temp = temp.getNext();
         }
-
     }
 
+
+    //-----------------BOMBILLOS HACIA ATRAS---------------------------
+    public void getLedBackwards(int place) throws Exception {
+        NodeDE temp = head;
+        int steps = 1;
+        while (temp != null) {
+            if (steps == place) {
+                temp.getData().setStateLed(true);
+                temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
+                if (temp.getPrevious() != null) {
+                    while (temp.getPrevious() != null) {
+                        Thread.sleep(1000);
+                        temp.getData().setStateLed(false);
+                        temp.getData().setLastoff(LocalTime.from(LocalDateTime.now()));
+                        temp = temp.getPrevious();
+                        temp.getData().setStateLed(true);
+                        temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
+                    }
+                }
+            }
+            steps++;
+            temp = temp.getNext();
+        }
+    }
+
+    //---------------------PRENDER BOMBILLO LED----------------------
     public int turnOnLeds(int place) {
         int size = getSize();
         int halfSize = size / 2;
@@ -229,281 +201,92 @@ public class ListDE {
         return place;
     }
 
-
-    public void turnLedOff(int place) throws Exception{
-
-        //reviso que los lugares ingresados sean válidos
-        if (head == null) {
-            throw new Exception("la lista está vacía");
-        } else if (place < 1) {
-            throw new Exception("el ingresado es menor a 1");
-        } else if (place > size){
-            throw new Exception("el lugar ingresado es mayor al tamaño de la lista");
+    //-------------------APAGAR EL BOMBILLO--------------------------
+    public void turnLedOff(int place) throws Exception {
+        if (head == null || place < 1 || place > size) {
+            throw new Exception("Error");
         }
-
-        //defino un ayudante y un contador para saber cuantos pasos llevo
         NodeDE temp = head;
         int steps = 1;
-
-        //recorro la lista
-        while (temp != null){
-
-            //reviso si el puesto es igual al puesto buscado
-            if (steps == place){
+        while (temp != null) {
+            if (steps == place) {
                 temp.getData().setStateLed(false);
                 temp.getData().setLastoff(LocalTime.from(LocalDateTime.now()));
+                Thread.sleep(1000); // sleep for 1 second
             }
             steps++;
             temp = temp.getNext();
         }
     }
 
-    public void getLedForwards(int place) throws Exception, Exception {
-
-        //defino un ayudante y un contador para saber cuantos pasos llevo
+    //-----------------------BORRAR POR LUGAR--------------------------------
+    public void deleteByPlace(int place) throws Exception {
+        if (head == null || place < 1 || place > size) {
+            throw new Exception("Error");
+        }
         NodeDE temp = head;
         int steps = 1;
-
-        //recorro la lista para llegar al lugar donde quiero que empiece la ola
         while (temp != null) {
-
-            //reviso si el puesto es igual al puesto buscado
             if (steps == place) {
-
-                //cuando llegue prendo el primer bombillo
-                temp.getData().setStateLed(true);
-                temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
-
-                //reviso si hay mas bombillos adelante
-                if (temp.getNext() != null){
-
-                    //empiezo otro ciclo para seguir la ola después del primer bombillo
-                    while (temp.getNext() != null) {
-
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e){
-                            throw new Exception("se ha interrumpido la ola");
-                        }
-
-                        //apago el bombillo con el que empecé
-                        temp.getData().setStateLed(false);
-                        temp.getData().setLastoff(LocalTime.from(LocalDateTime.now()));
-
-                        //paso al siguiente bombillo y lo prendo
-                        temp = temp.getNext();
-                        temp.getData().setStateLed(true);
-                        temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
-
-                    }
-
+                NodeDE prev = temp.getPrevious();
+                NodeDE next = temp.getNext();
+                if (prev == null) {
+                    head = next;
+                } else {
+                    prev.setNext(next);
                 }
-
+                if (next != null) {
+                    next.setPrevious(prev);
+                }
+                size--;
+                Thread.sleep(1000); // sleep for 1 second
             }
-
-            //aumento el contador de pasos y sigo con el siguiente bombillo
             steps++;
             temp = temp.getNext();
-
         }
     }
 
-    public void getLedBackwards (int place) throws Exception, Exception {
 
-        //defino un ayudante y un contador para saber cuantos pasos llevo
-        NodeDE temp = head;
-        int steps = 1;
+    //----------------MIRAR EL BOMBILLO---------------------
+    public void AverageOnLeds() throws Exception {
+        if(size == 0) return; // Si la lista está vacía, no hacemos nada
 
-        //recorro la lista para llegar al lugar donde quiero que empiece la ola
-        while (temp != null) {
+        // Inicializamos dos variables, una para el nodo más a la izquierda y otra para el nodo más a la derecha
+        NodeDE leftNode = head;
+        NodeDE rightNode = head;
 
-            //reviso si el puesto es igual al puesto buscado
-            if (steps == place) {
-
-                //cuando llegue prendo el primer bombillo
-                temp.getData().setStateLed(true);
-                temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
-
-                //reviso si hay mas bombillos adelante
-                if (temp.getPrevious() != null){
-
-                    //empiezo otro ciclo para seguir la ola después del primer bombillo
-                    while (temp.getPrevious() != null) {
-
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e){
-                            throw new Exception("se ha interrumpido la ola");
-                        }
-
-                        //apago el bombillo con el que empecé
-                        temp.getData().setStateLed(false);
-                        temp.getData().setLastoff(LocalTime.from(LocalDateTime.now()));
-
-                        //paso al siguiente bombillo y lo prendo
-                        temp = temp.getPrevious();
-                        temp.getData().setStateLed(true);
-                        temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
-
-                    }
-
-                }
-
+        // Si la lista tiene un número par de elementos, avanzamos el nodo de la derecha para que quede justo en la mitad
+        if(size % 2 == 0) {
+            for(int i = 0; i < size/2; i++) {
+                rightNode = rightNode.getNext();
             }
-
-            //aumento el contador de pasos y sigo con el siguiente bombillo
-            steps++;
-            temp = temp.getNext();
-
+        } else {
+            // Si la lista tiene un número impar de elementos, avanzamos el nodo de la derecha dos veces para que quede justo en la mitad
+            for(int i = 0; i < (size-1)/2; i++) {
+                rightNode = rightNode.getNext();
+            }
+            rightNode = rightNode.getNext();
         }
 
+        // Encendemos los LEDs de los nodos de la izquierda y de la derecha y establecemos la fecha de encendido
+        leftNode.getData().setStateLed(true);
+        rightNode.getData().setStateLed(true);
+        leftNode.getData().setLaston(LocalTime.now());
+        rightNode.getData().setLaston(LocalTime.now());
+
+        // Esperamos un segundo
+        TimeUnit.SECONDS.sleep(1);
+
+        // Apagamos los LEDs de los nodos de la izquierda y de la derecha y establecemos la fecha de apagado
+        leftNode.getData().setStateLed(false);
+        rightNode.getData().setStateLed(false);
+        leftNode.getData().setLastoff(LocalTime.now());
+        rightNode.getData().setLastoff(LocalTime.now());
     }
 
-    public void lightShow() throws Exception, Exception {
-
-        //primero reviso que la lista no esté vacía para mandar una excepción
-        if (head == null){
-            throw new Exception("La lista de bombillas está vacía");
-        }
-
-        //primero reviso si la cantidad de bombillas es par o impar
-        if (size % 2 == 0){
-
-            //aquí, la lsita sería par
-            int middle = (size / 2);
 
 
-            //defino un ayudante y un contador para saber cuantos pasos llevo
-            NodeDE temp = head;
-            int steps = 1;
 
-            //recorro la lista para llegar al lugar donde quiero que empiece la ola
-            while (temp != null) {
-
-                //reviso si el puesto es igual al puesto buscado
-                if (steps == (middle + 1)){
-
-                    //cuando llegue prendo el primer bombillo
-                    temp.getData().setStateLed(true);
-                    temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
-
-                    //creo un nuevo ayudante para que haga la ola hacia atras y hago que prenda el primer bombillo de ese lado
-                    NodeDE temp2 = temp.getPrevious();
-                    temp2.getData().setStateLed(true);
-                    temp2.getData().setLaston(LocalTime.from(LocalDateTime.now()));
-
-                    //reviso si hay mas bombillos adelante
-                    if (temp.getNext() != null){
-
-                        //empiezo otro ciclo para seguir la ola después del primer bombillo
-                        while (temp.getNext() != null) {
-
-                            //espero 1 segundo
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e){
-                                throw new Exception("se ha interrumpido la ola");
-                            }
-
-                            //apago el bombillo con el que empecé
-                            temp.getData().setStateLed(false);
-                            temp.getData().setLastoff(LocalTime.from(LocalDateTime.now()));
-
-                            //apago el bombillo con el que empecé con temp2
-                            temp2.getData().setStateLed(false);
-                            temp2.getData().setLastoff(LocalTime.from(LocalDateTime.now()));
-
-                            //paso al siguiente bombillo y lo prendo
-                            temp = temp.getNext();
-                            temp.getData().setStateLed(true);
-                            temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
-
-                            //con temp 2 me devuelvo un bombillo y lo prendo
-                            temp2 = temp2.getPrevious();
-                            temp2.getData().setStateLed(true);
-                            temp2.getData().setLaston(LocalTime.from(LocalDateTime.now()));
-
-                        }
-
-                    }
-
-                }
-
-                //aumento el contador de pasos y sigo con el siguiente bombillo
-                steps++;
-                temp = temp.getNext();
-
-            }
-
-
-        } else{
-            //aquí la lista sería impar
-            int middle = (size / 2) + 1;
-
-
-            //defino un ayudante y un contador para saber cuantos pasos llevo
-            NodeDE temp = head;
-            int steps = 1;
-
-            //recorro la lista para llegar al lugar donde quiero que empiece la ola
-            while (temp != null) {
-
-                //reviso si el puesto es igual al puesto buscado
-                if (steps == middle){
-
-                    //cuando llegue prendo el primer bombillo
-                    temp.getData().setStateLed(true);
-                    temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
-
-                    //creo un nuevo ayudante para que haga la ola hacia atras y hago que prenda el primer bombillo de ese lado
-                    NodeDE temp2 = temp;
-
-                    //reviso si hay mas bombillos adelante
-                    if (temp.getNext() != null){
-
-                        //empiezo otro ciclo para seguir la ola después del primer bombillo
-                        while (temp.getNext() != null) {
-
-                            //espero 1 segundo
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e){
-                                throw new Exception("se ha interrumpido la ola");
-                            }
-
-                            //apago el bombillo con el que empecé
-                            temp.getData().setStateLed(false);
-                            temp.getData().setLastoff(LocalTime.from(LocalDateTime.now()));
-
-                            //apago el bombillo con el que empecé con temp2
-                            temp2.getData().setStateLed(false);
-                            temp2.getData().setLastoff(LocalTime.from(LocalDateTime.now()));
-
-                            //paso al siguiente bombillo y lo prendo
-                            temp = temp.getNext();
-                            temp.getData().setStateLed(true);
-                            temp.getData().setLaston(LocalTime.from(LocalDateTime.now()));
-
-                            //con temp 2 me devuelvo un bombillo y lo prendo
-                            temp2 = temp2.getPrevious();
-                            temp2.getData().setStateLed(true);
-                            temp2.getData().setLaston(LocalTime.from(LocalDateTime.now()));
-
-                        }
-
-                    }
-
-                }
-
-                //aumento el contador de pasos y sigo con el siguiente bombillo
-                steps++;
-                temp = temp.getNext();
-
-            }
-
-        }
-
-    }
 
 }
 

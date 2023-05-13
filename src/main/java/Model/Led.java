@@ -15,10 +15,12 @@ public class Led {
     private LocalTime lastoff;
 
 
-    public Led(String id) {
-        this.identification = id;
+    public Led(String identification) {
+        this.identification = identification;
         this.stateLed = false;
     }
+
+
 
 
     public void turnOn() {
