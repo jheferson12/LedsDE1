@@ -1,4 +1,4 @@
-package Model;
+package co.edu.umanizales.ledsde.Model;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package Controller.Dto;
+package co.edu.umanizales.ledsde.Controller.DTO;
 
 import lombok.Data;
 

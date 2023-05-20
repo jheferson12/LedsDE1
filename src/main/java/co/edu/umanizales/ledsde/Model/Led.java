@@ -1,4 +1,4 @@
-package Model;
+package co.edu.umanizales.ledsde.Model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,7 +6,7 @@ import java.time.LocalTime;
 @Data
 @AllArgsConstructor
 public class Led {
-    private String identification;
+    private int identification;
 
     private boolean stateLed;
 
@@ -15,9 +15,9 @@ public class Led {
     private LocalTime lastoff;
 
 
-    public Led(String identification) {
+    public Led(int identification,boolean stateLed) {
         this.identification = identification;
-        this.stateLed = false;
+        this.stateLed = stateLed;
     }
 
 
@@ -30,9 +30,5 @@ public class Led {
         return true;
     }
 
-    public void setTurnoffled(Object o) {
-    }
 
-    public void setTurnonled(Object o) {
-    }
 }
